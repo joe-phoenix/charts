@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Labari Data — Charts & Visualisations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --ink:        #0F0F0E;
+      --paper:      #F7F5F0;
+      --mid:        #E8E5DE;
+      --muted:      #8A8780;
+      --accent:     #C1440E;      /* Labari red-orange */
+      --accent-dim: #F0DDD6;
+      --mono:       'IBM Plex Mono', monospace;
+      --sans:       'IBM Plex Sans', sans-serif;
+      --serif:      'Playfair Display', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      border-bottom: 2px solid var(--ink);
+      padding: 0 clamp(16px, 4vw, 48px);
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 0;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .header-brand .wordmark {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .header-brand .wordmark span {
+      color: var(--accent);
+    }
+
+    .header-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .header-meta .count-pill {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 3px 10px;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+    }
+
+    /* ── TOOLBAR ─────────────────────────────────────────────── */
+    .toolbar {
+      border-bottom: 1px solid var(--mid);
+      padding: 16px clamp(16px, 4vw, 48px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      background: var(--paper);
+      z-index: 100;
+    }
+
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 220px;
+      max-width: 400px;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      border: 1.5px solid var(--mid);
+      background: white;
+      font-family: var(--sans);
+      font-size: 0.875rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s;
+      border-radius: 0;
+    }
+
+    .search-input:focus { border-color: var(--ink); }
+    .search-input::placeholder { color: var(--muted); }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .filter-select {
+      padding: 8px 28px 8px 10px;
+      border: 1.5px solid var(--mid);
+      background: white;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink);
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8780'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      transition: border-color 0.15s;
+      border-radius: 0;
+    }
+
+    .filter-select:focus { border-color: var(--ink); }
+
+    .view-toggle {
+      display: flex;
+      border: 1.5px solid var(--mid);
+      overflow: hidden;
+      margin-left: auto;
+    }
+
+    .view-btn {
+      padding: 7px 10px;
+      background: white;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .view-btn.active {
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .clear-btn {
+      padding: 8px 14px;
+      background: none;
+      border: 1.5px solid var(--mid);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      border-radius: 0;
+    }
+
+    .clear-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .clear-btn.hidden { display: none; }
+
+    /* ── ACTIVE FILTERS ──────────────────────────────────────── */
+    .active-filters {
+      padding: 10px clamp(16px, 4vw, 48px);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      border-bottom: 1px solid var(--mid);
+    }
+
+    .active-filters.hidden { display: none; }
+
+    .filter-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--accent);
+      letter-spacing: 0.06em;
+    }
+
+    .filter-chip button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 0.85rem;
+      line-height: 1;
+      padding: 0;
+    }
+
+    /* ── MAIN ────────────────────────────────────────────────── */
+    main {
+      padding: clamp(24px, 4vw, 48px) clamp(16px, 4vw, 48px);
+    }
+
+    /* ── RESULTS META ────────────────────────────────────────── */
+    .results-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .results-count {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .results-query {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink);
+    }
+
+    /* ── GRID ────────────────────────────────────────────────── */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 1px;
+      background: var(--mid);
+      border: 1px solid var(--mid);
+    }
+
+    .chart-grid.list-view {
+      grid-template-columns: 1fr;
+    }
+
+    /* ── CHART CARD ──────────────────────────────────────────── */
+    .chart-card {
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .chart-card:hover { background: white; }
+
+    .card-meta {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--mid);
+    }
+
+    .card-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .card-type {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-category {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 2px 7px;
+    }
+
+    .card-title {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+    }
+
+    .card-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .card-footer {
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-date {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .card-tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      border: 1px solid var(--mid);
+      padding: 1px 6px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .tag:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* embed area — collapsed by default */
+    .card-embed {
+      display: none;
+      border-top: 1px solid var(--mid);
+      background: white;
+      padding: 16px 18px;
+    }
+
+    .card-embed iframe {
+      width: 100%;
+      border: none;
+      display: block;
+      min-height: 320px;
+    }
+
+    .chart-card.expanded .card-embed { display: block; }
+
+    .expand-hint {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* list view tweaks */
+    .list-view .chart-card {
+      flex-direction: row;
+      align-items: stretch;
+    }
+
+    .list-view .card-meta {
+      flex: 1;
+      border-bottom: none;
+      border-right: 1px solid var(--mid);
+    }
+
+    .list-view .card-footer {
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 8px;
+      min-width: 140px;
+    }
+
+    .list-view .card-embed {
+      display: none !important;
+    }
+
+    .list-view .expand-hint { display: none; }
+
+    /* ── EMPTY / LOADING ─────────────────────────────────────── */
+    .state-display {
+      grid-column: 1 / -1;
+      padding: 80px 24px;
+      text-align: center;
+      background: var(--paper);
+    }
+
+    .state-display .state-icon {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .state-display h3 {
+      font-family: var(--serif);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .state-display p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      max-width: 360px;
+      margin: 0 auto 20px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid var(--mid);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── CONFIG PANEL ────────────────────────────────────────── */
+    .config-banner {
+      background: var(--ink);
+      color: var(--paper);
+      padding: 12px clamp(16px, 4vw, 48px);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .config-banner p {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: #aaa;
+      flex: 1;
+    }
+
+    .config-banner input {
+      padding: 6px 10px;
+      background: #1f1f1e;
+      border: 1px solid #444;
+      color: var(--paper);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      flex: 1;
+      min-width: 200px;
+      outline: none;
+      border-radius: 0;
+    }
+
+    .config-banner input:focus { border-color: var(--accent); }
+
+    .config-btn {
+      padding: 7px 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: 0;
+    }
+
+    .config-btn:hover { background: #a83a0c; }
+
+    /* ── PAGINATION ──────────────────────────────────────────── */
+    .pagination {
+      margin-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .page-btn {
+      padding: 7px 14px;
+      background: white;
+      border: 1.5px solid var(--mid);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink);
+      cursor: pointer;
+      transition: all 0.12s;
+      border-radius: 0;
+    }
+
+    .page-btn:hover, .page-btn.active {
+      background: var(--ink);
+      color: var(--paper);
+      border-color: var(--ink);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .header-meta { display: none; }
+      .chart-grid { grid-template-columns: 1fr; }
+      .list-view .chart-card { flex-direction: column; }
+      .list-view .card-meta { border-right: none; border-bottom: 1px solid var(--mid); }
+      .list-view .card-footer { flex-direction: row; min-width: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- CONFIG BANNER (shown when no API config is set) -->
+<div class="config-banner" id="configBanner">
+  <p>BASEROW CONFIG — Enter your API token and Table ID to load charts</p>
+  <input type="text" id="cfgToken" placeholder="Baserow API token" />
+  <input type="text" id="cfgTable" placeholder="Table ID (e.g. 12345)" />
+  <button class="config-btn" onclick="saveConfig()">Connect</button>
+</div>
+
+<!-- HEADER -->
+<header>
+  <a href="#" class="header-brand">
+    <div>
+      <div class="wordmark">Labari <span>Data</span></div>
+      <span class="header-eyebrow">Charts &amp; Visualisations</span>
+    </div>
+  </a>
+  <div class="header-meta">
+    <span id="totalCount" class="count-pill">— charts</span>
+    <span>labari.co</span>
+  </div>
+</header>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+    </svg>
+    <input
+      class="search-input"
+      id="searchInput"
+      type="text"
+      placeholder="Search charts, topics, datasets…"
+      oninput="onFilterChange()"
+    />
+  </div>
+
+  <div class="filter-group">
+    <span class="filter-label">Category</span>
+    <select class="filter-select" id="filterCategory" onchange="onFilterChange()">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <span class="filter-label">Type</span>
+    <select class="filter-select" id="filterType" onchange="onFilterChange()">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div class="filter-group">
+    <span class="filter-label">Year</span>
+    <select class="filter-select" id="filterYear" onchange="onFilterChange()">
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <button class="clear-btn hidden" id="clearBtn" onclick="clearFilters()">Clear filters</button>
+
+  <div class="view-toggle">
+    <button class="view-btn active" id="viewGrid" onclick="setView('grid')" title="Grid view">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+      </svg>
+    </button>
+    <button class="view-btn" id="viewList" onclick="setView('list')" title="List view">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ACTIVE FILTER CHIPS -->
+<div class="active-filters hidden" id="activeFilters"></div>
+
+<!-- MAIN -->
+<main>
+  <div class="results-meta" id="resultsMeta" style="display:none">
+    <span class="results-count" id="resultsCount"></span>
+    <span class="results-query" id="resultsQuery"></span>
+  </div>
+
+  <div class="chart-grid" id="chartGrid">
+    <div class="state-display">
+      <div class="spinner"></div>
+      <p>Connecting to Baserow…</p>
+    </div>
+  </div>
+
+  <div class="pagination" id="pagination"></div>
+</main>
+
+<script>
+  /* ── CONFIG ─────────────────────────────────────────────────── */
+  // Hard-code your values here, or leave blank to use the config banner
+  const HARD_CODED_TOKEN = '';
+  const HARD_CODED_TABLE = '';
+
+  const PAGE_SIZE = 12;
+  let allCharts = [];
+  let filtered = [];
+  let currentPage = 1;
+  let currentView = 'grid';
+  let expandedCard = null;
+
+  /* ── INIT ──────────────────────────────────────────────────── */
+  function getConfig() {
+    return {
+      token: HARD_CODED_TOKEN || localStorage.getItem('br_token') || '',
+      table: HARD_CODED_TABLE || localStorage.getItem('br_table') || '',
+    };
+  }
+
+  function saveConfig() {
+    const token = document.getElementById('cfgToken').value.trim();
+    const table = document.getElementById('cfgTable').value.trim();
+    if (!token || !table) return alert('Please enter both your API token and Table ID.');
+    localStorage.setItem('br_token', token);
+    localStorage.setItem('br_table', table);
+    document.getElementById('configBanner').style.display = 'none';
+    fetchCharts();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const { token, table } = getConfig();
+    if (token && table) {
+      document.getElementById('configBanner').style.display = 'none';
+      fetchCharts();
+    } else {
+      renderState('config');
+    }
+  });
+
+  /* ── FETCH ──────────────────────────────────────────────────── */
+  async function fetchCharts() {
+    renderState('loading');
+    const { token, table } = getConfig();
+
+    // If no real config, load demo data
+    if (!token || !table) { loadDemo(); return; }
+
+    try {
+      let page = 1;
+      let results = [];
+      let hasMore = true;
+
+      while (hasMore) {
+        const url = `https://api.baserow.io/api/database/rows/table/${table}/?user_field_names=true&size=100&page=${page}`;
+        const res = await fetch(url, {
+          headers: { Authorization: `Token ${token}` }
+        });
+
+        if (!res.ok) throw new Error(`Baserow error: ${res.status}`);
+        const data = await res.json();
+        results = results.concat(data.results);
+        hasMore = !!data.next;
+        page++;
+      }
+
+      // Filter only active rows if an Active field exists
+      allCharts = results.filter(r => r.Active !== false);
+      document.getElementById('totalCount').textContent = `${allCharts.length} charts`;
+      buildFilterOptions();
+      applyFilters();
+    } catch (err) {
+      renderState('error', err.message);
+    }
+  }
+
+  /* ── DEMO DATA ──────────────────────────────────────────────── */
+  function loadDemo() {
+    allCharts = [
+      {
+        id: 1,
+        Title: 'Ghana Government Contracts by Ministry, 2023',
+        Description: 'Total value of contracts awarded to each ministry in the 2023 fiscal year, sourced from PPA disclosures.',
+        'Datawrapper ID': 'AA1bB',
+        'Embed URL': 'https://datawrapper.dwcdn.net/AA1bB/1/',
+        Category: { value: 'Procurement' },
+        Tags: [{ value: 'contracts' }, { value: 'budget' }, { value: 'ministry' }],
+        'Chart Type': { value: 'Bar chart' },
+        'Date Published': '2024-03-15',
+        Active: true,
+      },
+      {
+        id: 2,
+        Title: 'Accra Air Quality Index — 12-Month Trend',
+        Description: 'Monthly average AQI readings across five monitoring stations in Greater Accra.',
+        'Datawrapper ID': 'BB2cC',
+        'Embed URL': 'https://datawrapper.dwcdn.net/BB2cC/1/',
+        Category: { value: 'Environment' },
+        Tags: [{ value: 'air quality' }, { value: 'accra' }, { value: 'health' }],
+        'Chart Type': { value: 'Line chart' },
+        'Date Published': '2024-06-01',
+        Active: true,
+      },
+      {
+        id: 3,
+        Title: 'West Africa Mobile Money Market Share, Q1 2024',
+        Description: 'Breakdown of mobile money transaction volumes by operator across Ghana, Nigeria, Côte d'Ivoire, and Senegal.',
+        'Datawrapper ID': 'CC3dD',
+        'Embed URL': 'https://datawrapper.dwcdn.net/CC3dD/1/',
+        Category: { value: 'Fintech' },
+        Tags: [{ value: 'mobile money' }, { value: 'momo' }, { value: 'telco' }],
+        'Chart Type': { value: 'Stacked bar' },
+        'Date Published': '2024-04-22',
+        Active: true,
+      },
+      {
+        id: 4,
+        Title: 'Ghana Parliamentary Votes by Party, 2023 Session',
+        Description: 'How NDC and NPP MPs voted on key bills in the 2023 legislative calendar.',
+        'Datawrapper ID': 'DD4eE',
+        'Embed URL': 'https://datawrapper.dwcdn.net/DD4eE/1/',
+        Category: { value: 'Parliament' },
+        Tags: [{ value: 'votes' }, { value: 'NDC' }, { value: 'NPP' }, { value: 'legislature' }],
+        'Chart Type': { value: 'Table' },
+        'Date Published': '2024-01-10',
+        Active: true,
+      },
+      {
+        id: 5,
+        Title: 'Startup Funding in Sub-Saharan Africa, 2020–2023',
+        Description: 'Total VC and angel investment into SSA startups by country and sector over four years.',
+        'Datawrapper ID': 'EE5fF',
+        'Embed URL': 'https://datawrapper.dwcdn.net/EE5fF/1/',
+        Category: { value: 'Startups' },
+        Tags: [{ value: 'funding' }, { value: 'VC' }, { value: 'investment' }],
+        'Chart Type': { value: 'Bar chart' },
+        'Date Published': '2023-12-05',
+        Active: true,
+      },
+      {
+        id: 6,
+        Title: 'Ghana Constituency Poverty Map, 2021 Census',
+        Description: 'District-level poverty headcount ratio based on the 2021 Population and Housing Census.',
+        'Datawrapper ID': 'FF6gG',
+        'Embed URL': 'https://datawrapper.dwcdn.net/FF6gG/1/',
+        Category: { value: 'Demographics' },
+        Tags: [{ value: 'poverty' }, { value: 'census' }, { value: 'districts' }],
+        'Chart Type': { value: 'Choropleth map' },
+        'Date Published': '2023-09-18',
+        Active: true,
+      },
+    ];
+
+    document.getElementById('totalCount').textContent = `${allCharts.length} charts (demo)`;
+    buildFilterOptions();
+    applyFilters();
+  }
+
+  /* ── NORMALISE FIELD ────────────────────────────────────────── */
+  // Baserow single-select returns {id, value}, multi-select returns [{id,value}]
+  function fieldVal(v) {
+    if (!v) return '';
+    if (typeof v === 'string') return v;
+    if (Array.isArray(v)) return v.map(i => (i.value || i)).join(', ');
+    if (v.value) return v.value;
+    return String(v);
+  }
+
+  function fieldArr(v) {
+    if (!v) return [];
+    if (Array.isArray(v)) return v.map(i => i.value || i);
+    if (typeof v === 'string') return v.split(',').map(s => s.trim()).filter(Boolean);
+    return [fieldVal(v)];
+  }
+
+  /* ── FILTER OPTIONS ─────────────────────────────────────────── */
+  function buildFilterOptions() {
+    const categories = [...new Set(allCharts.map(c => fieldVal(c.Category)).filter(Boolean))].sort();
+    const types = [...new Set(allCharts.map(c => fieldVal(c['Chart Type'])).filter(Boolean))].sort();
+    const years = [...new Set(allCharts.map(c => {
+      const d = c['Date Published'];
+      return d ? new Date(d).getFullYear() : null;
+    }).filter(Boolean))].sort((a,b) => b - a);
+
+    populateSelect('filterCategory', categories);
+    populateSelect('filterType', types);
+    populateSelect('filterYear', years);
+  }
+
+  function populateSelect(id, options) {
+    const sel = document.getElementById(id);
+    const current = sel.value;
+    while (sel.options.length > 1) sel.remove(1);
+    options.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o;
+      opt.textContent = o;
+      sel.appendChild(opt);
+    });
+    if (current) sel.value = current;
+  }
+
+  /* ── FILTER LOGIC ───────────────────────────────────────────── */
+  function onFilterChange() {
+    currentPage = 1;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    const cat = document.getElementById('filterCategory').value;
+    const type = document.getElementById('filterType').value;
+    const year = document.getElementById('filterYear').value;
+
+    filtered = allCharts.filter(c => {
+      const title = (c.Title || '').toLowerCase();
+      const desc  = (c.Description || '').toLowerCase();
+      const tags  = fieldArr(c.Tags).join(' ').toLowerCase();
+
+      const matchQ    = !q || title.includes(q) || desc.includes(q) || tags.includes(q);
+      const matchCat  = !cat  || fieldVal(c.Category) === cat;
+      const matchType = !type || fieldVal(c['Chart Type']) === type;
+      const matchYear = !year || (c['Date Published'] && new Date(c['Date Published']).getFullYear() == year);
+
+      return matchQ && matchCat && matchType && matchYear;
+    });
+
+    updateActiveFilters(q, cat, type, year);
+    updateResultsMeta(q);
+    updateClearBtn(q, cat, type, year);
+    renderPage();
+    renderPagination();
+  }
+
+  function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('filterCategory').value = '';
+    document.getElementById('filterType').value = '';
+    document.getElementById('filterYear').value = '';
+    onFilterChange();
+  }
+
+  function updateClearBtn(q, cat, type, year) {
+    const hasFilter = q || cat || type || year;
+    document.getElementById('clearBtn').classList.toggle('hidden', !hasFilter);
+  }
+
+  function updateActiveFilters(q, cat, type, year) {
+    const wrap = document.getElementById('activeFilters');
+    wrap.innerHTML = '';
+    const chips = [];
+    if (q) chips.push(['Search', q, () => { document.getElementById('searchInput').value = ''; onFilterChange(); }]);
+    if (cat) chips.push(['Category', cat, () => { document.getElementById('filterCategory').value = ''; onFilterChange(); }]);
+    if (type) chips.push(['Type', type, () => { document.getElementById('filterType').value = ''; onFilterChange(); }]);
+    if (year) chips.push(['Year', year, () => { document.getElementById('filterYear').value = ''; onFilterChange(); }]);
+
+    if (chips.length === 0) { wrap.classList.add('hidden'); return; }
+    wrap.classList.remove('hidden');
+    chips.forEach(([label, val, clear]) => {
+      const chip = document.createElement('div');
+      chip.className = 'filter-chip';
+      chip.innerHTML = `<span>${label}: <strong>${val}</strong></span><button title="Remove filter">×</button>`;
+      chip.querySelector('button').onclick = clear;
+      wrap.appendChild(chip);
+    });
+  }
+
+  function updateResultsMeta(q) {
+    const meta = document.getElementById('resultsMeta');
+    const countEl = document.getElementById('resultsCount');
+    const queryEl = document.getElementById('resultsQuery');
+    if (filtered.length === allCharts.length && !q) {
+      meta.style.display = 'none';
+      return;
+    }
+    meta.style.display = 'flex';
+    countEl.textContent = `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+    queryEl.textContent = q ? `for "${q}"` : '';
+  }
+
+  /* ── RENDER ─────────────────────────────────────────────────── */
+  function renderPage() {
+    const grid = document.getElementById('chartGrid');
+    grid.innerHTML = '';
+    grid.className = `chart-grid${currentView === 'list' ? ' list-view' : ''}`;
+
+    if (filtered.length === 0) {
+      renderState('empty');
+      return;
+    }
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const page = filtered.slice(start, start + PAGE_SIZE);
+
+    page.forEach(chart => {
+      grid.appendChild(buildCard(chart));
+    });
+
+    // Datawrapper responsive script
+    if (!document.getElementById('dw-script')) {
+      const s = document.createElement('script');
+      s.id = 'dw-script';
+      s.src = 'https://datawrapper.dwcdn.net/lib/embed.js';
+      document.head.appendChild(s);
+    }
+  }
+
+  function buildCard(chart) {
+    const title    = chart.Title || 'Untitled';
+    const desc     = chart.Description || '';
+    const embedUrl = chart['Embed URL'] || '';
+    const dwId     = chart['Datawrapper ID'] || '';
+    const category = fieldVal(chart.Category);
+    const type     = fieldVal(chart['Chart Type']);
+    const tags     = fieldArr(chart.Tags);
+    const date     = chart['Date Published']
+      ? new Date(chart['Date Published']).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'chart-card';
+    card.dataset.id = chart.id;
+
+    card.innerHTML = `
+      <div class="card-meta">
+        <div class="card-eyebrow">
+          ${type ? `<span class="card-type">${type}</span>` : ''}
+          ${category ? `<span class="card-category">${category}</span>` : ''}
+        </div>
+        <div class="card-title">${title}</div>
+        ${desc ? `<div class="card-desc">${desc}</div>` : ''}
+      </div>
+      <div class="card-footer">
+        ${date ? `<span class="card-date">${date}</span>` : ''}
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="card-tags">
+            ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
+          </div>
+          ${currentView !== 'list' ? `<span class="expand-hint">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+            view chart
+          </span>` : ''}
+        </div>
+      </div>
+      ${embedUrl ? `
+      <div class="card-embed">
+        <iframe
+          title="${title}"
+          src="${embedUrl}"
+          scrolling="no"
+          frameborder="0"
+          loading="lazy"
+          height="400">
+        </iframe>
+      </div>` : ''}
+    `;
+
+    // Tag click — filter by tag
+    card.querySelectorAll('.tag').forEach(tagEl => {
+      tagEl.onclick = (e) => {
+        e.stopPropagation();
+        document.getElementById('searchInput').value = tagEl.textContent.trim();
+        onFilterChange();
+      };
+    });
+
+    // Click to expand embed (grid view only)
+    card.onclick = () => {
+      if (currentView === 'list') return;
+      if (!embedUrl) return;
+      if (expandedCard && expandedCard !== card) {
+        expandedCard.classList.remove('expanded');
+      }
+      card.classList.toggle('expanded');
+      expandedCard = card.classList.contains('expanded') ? card : null;
+    };
+
+    return card;
+  }
+
+  function renderState(type, msg) {
+    const grid = document.getElementById('chartGrid');
+    grid.className = 'chart-grid';
+    grid.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'state-display';
+
+    if (type === 'loading') {
+      div.innerHTML = `<div class="spinner"></div><p>Loading charts from Baserow…</p>`;
+    } else if (type === 'empty') {
+      div.innerHTML = `<span class="state-icon">🔍</span><h3>No charts found</h3><p>Try adjusting your search or filters.</p>`;
+    } else if (type === 'error') {
+      div.innerHTML = `<span class="state-icon">⚠️</span><h3>Connection error</h3><p>${msg || 'Could not reach Baserow. Check your API token and table ID.'}</p>`;
+    } else if (type === 'config') {
+      div.innerHTML = `<span class="state-icon">🔌</span><h3>Connect your Baserow table</h3><p>Enter your API token and Table ID in the banner above to load your charts.</p>`;
+    }
+
+    grid.appendChild(div);
+    document.getElementById('pagination').innerHTML = '';
+  }
+
+  /* ── PAGINATION ─────────────────────────────────────────────── */
+  function renderPagination() {
+    const wrap = document.getElementById('pagination');
+    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+    wrap.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    const prev = document.createElement('button');
+    prev.className = 'page-btn';
+    prev.textContent = '← Prev';
+    prev.disabled = currentPage === 1;
+    prev.onclick = () => goPage(currentPage - 1);
+    wrap.appendChild(prev);
+
+    // Page numbers
+    for (let p = 1; p <= totalPages; p++) {
+      if (totalPages > 7 && (p > 2 && p < totalPages - 1) && Math.abs(p - currentPage) > 1) {
+        if (p === 3 || p === totalPages - 2) {
+          const ellipsis = document.createElement('span');
+          ellipsis.textContent = '…';
+          ellipsis.style.cssText = 'font-family:var(--mono);font-size:.72rem;color:var(--muted);padding:0 4px';
+          wrap.appendChild(ellipsis);
+        }
+        continue;
+      }
+      const btn = document.createElement('button');
+      btn.className = `page-btn${p === currentPage ? ' active' : ''}`;
+      btn.textContent = p;
+      btn.onclick = () => goPage(p);
+      wrap.appendChild(btn);
+    }
+
+    const next = document.createElement('button');
+    next.className = 'page-btn';
+    next.textContent = 'Next →';
+    next.disabled = currentPage === totalPages;
+    next.onclick = () => goPage(currentPage + 1);
+    wrap.appendChild(next);
+  }
+
+  function goPage(p) {
+    currentPage = p;
+    renderPage();
+    renderPagination();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ── VIEW TOGGLE ─────────────────────────────────────────────── */
+  function setView(v) {
+    currentView = v;
+    expandedCard = null;
+    document.getElementById('viewGrid').classList.toggle('active', v === 'grid');
+    document.getElementById('viewList').classList.toggle('active', v === 'list');
+    renderPage();
+  }
+</script>
+</body>
+</html>
