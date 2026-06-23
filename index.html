@@ -475,10 +475,6 @@
       allCharts = results.filter(r => r.Active !== false);
 
       const chartCount = allCharts.length;
-      const categoryCount = new Set(allCharts.map(c => fieldVal(c.Category)).filter(Boolean)).size;
-
-      document.getElementById('heroChartCount').textContent = chartCount;
-      document.getElementById('heroCategoryCount').textContent = categoryCount;
       document.getElementById('totalCount').textContent = `${chartCount} chart${chartCount !== 1 ? 's' : ''}`;
 
       if (!chartCount) { showState('empty-db'); return; }
