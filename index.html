@@ -527,11 +527,13 @@
     const cat = document.getElementById('filterCategory').value;
 
     filtered = allCharts.filter(c => {
-      const title = (c.Title || '').toLowerCase();
-      const desc  = (c.Description || '').toLowerCase();
-      const tags  = fieldArr(c.Tags).join(' ').toLowerCase();
+      const title   = (c.Title || '').toLowerCase();
+      const desc    = (c.Description || '').toLowerCase();
+      const tagList = fieldArr(c.Tags).map(t => t.toLowerCase());
+      const tagsStr = tagList.join(' ');
+      const matchesTag = tagList.some(t => t.includes(q)) || tagsStr.includes(q);
       return (
-        (!q   || title.includes(q) || desc.includes(q) || tags.includes(q)) &&
+        (!q   || title.includes(q) || desc.includes(q) || matchesTag) &&
         (!cat || fieldVal(c.Category) === cat)
       );
     });
